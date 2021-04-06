@@ -9,12 +9,14 @@
 
 Compiler is `ghc` and interactive terminal is `ghci` (similar to the Python3
 interactive terminal). Type `:h` for helpful commands. Type `:t <expr>` for the
-type of an expression.
+type of an expression. Type `:l <file>` to load a Haskell file/module.
 
 ### hello world
 
 ```haskell
-main = putStrLn "Hello World"
+main :: IO()
+main = do
+    putStrLn "Hello World"
 ```
 
 ### names
@@ -82,6 +84,33 @@ defined by `(,) x y`, `(,,) x y z`, etc.
 Errors in Haskell are denoted as ⊥ ("bottom") and indistinguishable from
 non-termination.
 
+### custom data types
+
+Can be defined using the `data` keyword. Custom data types must start with a
+uppercase letter.
+```haskell
+data Shape = Circle Float Float Float
+areaOf :: Shape -> Float
+areaOf (Circle _ _ r) = pi * r * r
+```
+
+### class interfaces
+
+`Eq` provides equality functionality for `==` and `/=`.
+
+`Ord` provides ordering functionality for `<`, `<=`, `>=`, `>`, and `compare`.
+
+`Show` provides functionality to convert other types to `String`.
+
+`Read` provides functionality to convert a `String` to other types.
+
+`Enum` provides sequential ordering functionality, usable with the `succ x` and
+`pred x` functions. Compatible types include `Bool`, `Char`, and numbers.
+
+`Num` is used for number operations. Subclasses include `Int`, `Integer`,
+`Float`, and `Double`. They can further be split up under `Integral` and
+`Floating`.
+
 ### operators
 
 Arithmetic uses standard `+`, `-`, `*`, `/`. Integer division requires using the
@@ -141,31 +170,144 @@ Do expressions are `do { stmt1 ... stmtn exp }`. Each statement can be
 
 ### functions
 
-TODO describe creating functions and types and stuff
+Defining a function is done by specifying a name (beginning in lowercase),
+arguments, and types which can sometimes be inferred by the compiler. Different
+cases of arguments can be specified and pattern matching is done from first to
+last. Some examples below:
+```haskell
+-- recursive add that moves 2nd argument toward 0
+add :: Integer -> Integer -> Integer
+add x 0 = x
+add x y = if y > 0 then add (x+1) (y-1) else add (x-1) (y+1)
+```
+
+Guards may be used, similar to pattern matching. They test for a condition on
+the inputs.
+```haskell
+factorial :: Integer -> Integer
+factorial n | n == 0 = 1
+            | n > 0 = n * (factorial (n-1))
+```
+
+The where clause can be helpful for more complex calculations, breaking them
+into smaller parts.
+```haskell
+-- quadratic formula
+zeroes :: (Float,Float,Float) -> (Float,Float)
+zeroes (a,b,c) = (x1,x2) where
+    x1 = extrema + dist
+    x2 = extrema - dist
+    dist = (sqrt det) / (2.0*a)
+    det = b*b - 4.0*a*c
+    extrema = -b / (2.0*a)
+```
+
+Higher order functions use other functions as input. For example, a definition
+for `map`:
+```haskell
+map :: (a -> b) -> [a] -> [b]
+map _ [] = []
+map f (h:t) = f h : map f t
+```
+
+Function composition uses the '.' operator. For example, `(floor.sqrt) x` would
+compute an upper bound for trial division factoring of `x`.
+
+### exceptions
+
+They can be handled by a case statement. An example below:
+```haskell
+import Control.Exception
+main = do
+    result <- try (evaluate (div 2 0)) :: IO (Either SomeException Int)
+    case result of
+        Left ex -> putStrLn $ "exception: " ++ show ex
+        Right val -> putStrLn $ "success: " ++ show val
+```
 
 ### modules
 
-TODO describe creating and importing
+Module creation is done in its own file beginning with a list of things in the
+module, followed by their definitions.
+```haskell
+module ModuleName (
+    isEven,
+    isOdd,
+    bool2int
+) where
+
+isEven :: Integer -> Bool
+isEven x = x `rem` 2 == 0
+
+isOdd :: Integer -> Bool
+isOdd x = not (isEven x)
+
+bool2int :: Bool -> Int
+bool2int b = if b then 1 else 0
+```
 
 ### builtin stuff
 
+Math stuff 
 - `abs x` absolute value
 - `signum x` sign of `x` (`-1` or `0` or `1`)
 - `negate x` same as `-x`
 - `mod x y` modular arithmetic
-- `length x` list length
 - `ceiling x` ceiling of a floating point
 - `floor x` floor of a floating point
 - `truncate x` nearest integer between `0` and `x` inclusive
 - `round x` nearest integer, round to even if exactly in the middle
 - `properFraction x` splits `x=n+f`, `n` is integer, `0.0 <= f < 1.0`
-- `div x y` integer division
+- `quot x y` integer division (truncated to 0)
+- `rem x y` division remainder, satisfies `(quot x y)*y + (rem x y) == x`
+- `quotRem x y` returns `(quot x y, rem x y)`
+- `div x y` integer division (truncated to -infinity)
+- `mod x y` division remainder, satisfies `(div x y)*y + (mod x y) == x`
+- `divMod x y` returns `(div x y, mod x y)`
 - `gcd x y`
+- `sqrt x`
+- `min x y`
+- `max x y`
+
+Floating point stuff
 - `isNaN x`
 - `isInfinite x`
 - `isDenormalized x`
 - `isNegativeZero x`
 - `isIEEE x`
+
+List stuff
+- `length x` list length
+- `head l` list head (cannot be empty)
+- `tail l` list tail (all except first element, cannot be empty)
+- `last l` last list element
+- `init l` all but last element of list
+- `null l` is list empty
+- `reverse l` elements in reverse order
+- `take n l` first n elements
+- `drop n l` all elements after the first n
+- `maximum x` max element
+- `minimum x` min element
+- `sum l` addition fold
+- `product l` multiplication fold
+- `elem e l` is `e` in `l`
+
+### other standard modules
+
+`Data.List`
+- `intersperse '.' "abc" == "a.b.c"` inserts new element between list elements
+- `intercalate " " ["a","b","c"] == "a b c"` concatenates lists with a list
+inserted between each provided list
+- `splitAt 5 "HelloWorld" == ["Hello","World"]` split into 2, similar to
+`l[:5]` and `l[5:]` in Python3.
+- `sort l` sort elements
+
+`Data.Char`
+- `toUpper c`
+- `toLower c`
+- `words s` split string into words
+
+`Data.Set`
 
 ### input/output
 
