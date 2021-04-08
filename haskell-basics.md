@@ -121,6 +121,9 @@ head and tail in lists. The `->` is used for function type mappings. In pattern
 matching, `_` is the wildcard, `~` is for irrefutable patterns, and `@` means
 "read as". The `!` forces evaluation (Haskell is lazy by default).
 
+The `$` is infix application, with `f $ g` meaning `f g`. It enables writing
+expressions like `f (g x)` without parenthesis as `f $ g x`.
+
 ### expressions
 
 Sample parses
@@ -182,11 +185,12 @@ add x y = if y > 0 then add (x+1) (y-1) else add (x-1) (y+1)
 ```
 
 Guards may be used, similar to pattern matching. They test for a condition on
-the inputs.
+the inputs. The `otherwise` keyword is used when none of the other cases work.
 ```haskell
 factorial :: Integer -> Integer
 factorial n | n == 0 = 1
             | n > 0 = n * (factorial (n-1))
+            | otherwise = (-1) -- invalid input
 ```
 
 The where clause can be helpful for more complex calculations, breaking them
@@ -208,6 +212,11 @@ for `map`:
 map :: (a -> b) -> [a] -> [b]
 map _ [] = []
 map f (h:t) = f h : map f t
+
+-- variant to map several functions to a list, keeping the same type
+multimap :: [a -> a] -> [a] -> [a]
+multimap [] l = l
+multimap (h:t) l = multimap t (map h l)
 ```
 
 Function composition uses the '.' operator. For example, `(floor.sqrt) x` would
@@ -224,6 +233,10 @@ main = do
         Left ex -> putStrLn $ "exception: " ++ show ex
         Right val -> putStrLn $ "success: " ++ show val
 ```
+
+### monads
+
+TODO
 
 ### modules
 
