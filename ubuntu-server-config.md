@@ -27,7 +27,7 @@ Then run `sudo netplan apply`.
 Source: https://linuxize.com/post/how-to-set-dns-nameservers-on-ubuntu-18-04/
 
 ### wireguard basics
---------------------------------------------------------------------------------
+
 Generating a keypair: `wg genkey | tee privatekey | wg pubkey > publickey`
 
 Put the private key here: `cp privatekey /etc/wireguard/wg1.key`
