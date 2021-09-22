@@ -48,3 +48,24 @@ fix this, the following command will help:
 
 To create a zpool: `zpool create <name> [type] drives...`. It creates a mount
 point at `/<name>`. Type can be `raidz`, `raidz2`, or `mirror`.
+
+### zram
+
+Setup (will be available on next reboot)
+```
+sudo apt install util-linux zram-config
+cat /proc/swaps
+```
+
+Edit zram size in `/usr/bin/init-zram-swapping`. Edit the
+`mem=$(((totalmem / 2 / ${NRDEVICES}) * 1024 ))` line. Default is half of the
+RAM.
+
+Possible changes
+- Remove the `/ 2` to use the same size as the RAM
+- Change `1024` to `1536` to use 75% of the RAM
+
+Edit the zram algorithm by finding the
+`echo $mem > /sys/block/zram${DEVNUMBER}/disksize` line. Below it, put a line
+like `echo zstd > /sys/block/zram${DEVNUMBER}/comp_algorithm`. The algorithm
+could also be `lz4` or `lzo` or some other options.
