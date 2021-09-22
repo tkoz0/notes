@@ -66,6 +66,7 @@ Possible changes
 - Change `1024` to `1536` to use 75% of the RAM
 
 Edit the zram algorithm by finding the
-`echo $mem > /sys/block/zram${DEVNUMBER}/disksize` line. Below it, put a line
+`echo $mem > /sys/block/zram${DEVNUMBER}/disksize` line. Above it, put a line
 like `echo zstd > /sys/block/zram${DEVNUMBER}/comp_algorithm`. The algorithm
-could also be `lz4` or `lzo` or some other options.
+could also be `lz4` or `lzo` or some other options. The algorithm must be set
+before setting the zram device size.
